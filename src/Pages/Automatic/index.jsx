@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button, Checkbox, Input, Spin } from 'antd';
 import './style.scss'
-import images from 'src/Configs/images';
 import AppContext from 'src/Context/AppContext';
 import Web3 from 'web3'
 import icLoadingDark from 'src/static/images/icon/loading-dark.gif'
@@ -19,6 +18,7 @@ const Automatic = () => {
 
   const [abiJson, setAbiJson] = useState('')
   const [contractAddress, setContractAddress] = useState('')
+  const [rpc, setRPC] = useState('')
   const [abi, setAbi] = useState(null)
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
@@ -123,7 +123,7 @@ const Automatic = () => {
   // }, [])
   const runTransaction = async (address, privateKey, params) => {
     try{
-    const web3 = new Web3(new Web3.providers.HttpProvider('https://rpc.testnet.tomochain.com'))
+    const web3 = new Web3(new Web3.providers.HttpProvider(rpc))
     const contract = new web3.eth.Contract([abi], contractAddress)
     const dataTx = contract.methods.convert(...params).encodeABI()
     const gasPrice = await web3.eth.getGasPrice();
@@ -157,6 +157,10 @@ const Automatic = () => {
   const renderStep1 = () => {
     return (
       <>
+       <div className='input-wrapper MT10'>
+          <p className='title'>RPC: </p>
+          <Input disabled={loading} className='input MT5' placeholder='' value={rpc} onChange={(e) => setRPC(e.target.value)} />
+        </div>
        <div className='input-wrapper MT10'>
           <p className='title'>Contract Address: </p>
           <Input disabled={loading} className='input MT5' placeholder='0x...' value={contractAddress} onChange={(e) => setContractAddress(e.target.value)} />
@@ -219,7 +223,7 @@ const Automatic = () => {
 
   return (
     <div className='automatic-container'>
-      <h2 className='title'>Automatic (TOMO)</h2>
+      <h2 className='title'>Automatic</h2>
       {step === 1 && renderStep1()}
       {step === 2 && abi && renderStep2()}
       {error && <h3 className='text-error'>{error}</h3>}
