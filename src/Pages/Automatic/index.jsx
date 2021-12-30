@@ -102,7 +102,14 @@ const Automatic = () => {
       for (let i = Number(from); i < Number(to); i++) {
         const params = abi.inputs.map((item) => {
           if (objNotMulti[item.name]){
-            return objNotMulti[item.name].value
+            if (item.type.includes('int') && item.type.includes('[]')) {
+              const arr = JSON.parse(objNotMulti[item.name].value)
+              return arr.map(item => Number(item))
+            } else if (item.type.includes('int')) {
+              return Number(objNotMulti[item.name].value)
+            } else {
+              return objNotMulti[item.name].value
+            }
           } else {
             return i
           }
@@ -111,13 +118,40 @@ const Automatic = () => {
       }
     }
   }
+  // useEffect(() => {
+  //   runTransaction()
+  // }, [])
   const runTransaction = async (address, privateKey, params) => {
-    console.log(address, privateKey)
-    console.log(params)
+    try{
     const web3 = new Web3(new Web3.providers.HttpProvider('https://rpc.testnet.tomochain.com'))
-    console.log(web3)
-    const contract = new web3.eth.Contract(abiJson, contractAddress)
-    console.log(contract)
+    const contract = new web3.eth.Contract([abi], contractAddress)
+    const dataTx = contract.methods.convert(...params).encodeABI()
+    const gasPrice = await web3.eth.getGasPrice();
+    const nonce = await web3.eth.getTransactionCount(address);
+
+    const rawTransaction = {
+      nonce: web3.utils.toHex(nonce),
+      gasPrice: web3.utils.toHex(gasPrice * 1.1),
+      from: address,
+      to: contractAddress,
+      data: dataTx,
+    };
+    const gasLimit = await web3.eth.estimateGas(rawTransaction);
+
+    const gasLimitHex = web3.utils.toHex(gasLimit);
+    rawTransaction.gasLimit = gasLimitHex;
+    const signedTransaction = await web3.eth.accounts.signTransaction(rawTransaction, privateKey);
+    return web3.eth
+      .sendSignedTransaction(signedTransaction.rawTransaction)
+      .on('receipt', ({ transactionHash }) => {
+        console.log(`${abi.name} hash: ${transactionHash}`)
+      })
+      .catch((error) => {
+        console.log('error', error);
+      });
+    } catch (error) {
+      console.log('error', error);
+    }
   }
 
   const renderStep1 = () => {
