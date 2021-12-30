@@ -4,6 +4,9 @@
   "description": "twon",
   "license": "MIT",
   "private": true,
+  "engines": {
+    "node": "14.x"
+  },
   "dependencies": {
     "antd": "^4.12.3",
     "axios": "^0.21.1",
