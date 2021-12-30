@@ -114,7 +114,7 @@ const Automatic = () => {
             return i
           }
         })
-        runTransaction(inputs.userAddress.value, inputs.privateKey.value, params)
+        await runTransaction(inputs.userAddress.value, inputs.privateKey.value, params)
       }
     }
   }
