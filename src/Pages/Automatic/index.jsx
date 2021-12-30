@@ -4,6 +4,8 @@ import './style.scss'
 import images from 'src/Configs/images';
 import AppContext from 'src/Context/AppContext';
 import Web3 from 'web3'
+import icLoadingDark from 'src/static/images/icon/loading-dark.gif'
+import icLoading from 'src/static/images/icon/loading.gif'
 
 const TYPE_MULTI = {
   NONE: 'none',
@@ -16,6 +18,7 @@ const Automatic = () => {
   const { isDarkMode } = app
 
   const [abiJson, setAbiJson] = useState('')
+  const [contractAddress, setContractAddress] = useState('')
   const [abi, setAbi] = useState(null)
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
@@ -58,7 +61,7 @@ const Automatic = () => {
       return null
     })
     arrMultil = arrMultil.filter(item => item !== null)
-    
+
     let arrNotMultil = abi.inputs.map((item) => {
       if (!cloneObjInputs[item.name].isMulti) {
         objNotMulti[item.name] = cloneObjInputs[item.name]
@@ -104,16 +107,17 @@ const Automatic = () => {
             return i
           }
         })
-        runTransaction(inputs.addressContract.value, inputs.privateKey.value, params)
+        runTransaction(inputs.userAddress.value, inputs.privateKey.value, params)
       }
     }
   }
   const runTransaction = async (address, privateKey, params) => {
     console.log(address, privateKey)
     console.log(params)
-    // const web3 = new Web3()
-    // web3.setProvider(new Web3.providers.HttpProvider('https://rpc.testnet.tomochain.com'))
-    // const contract = new web3.eth.Contract(abi, '0x6347809d6a907da7eab615dec646a36a3fc2fdef')
+    const web3 = new Web3(new Web3.providers.HttpProvider('https://rpc.testnet.tomochain.com'))
+    console.log(web3)
+    const contract = new web3.eth.Contract(abiJson, contractAddress)
+    console.log(contract)
   }
 
   const renderStep1 = () => {
@@ -121,13 +125,13 @@ const Automatic = () => {
       <>
        <div className='input-wrapper MT10'>
           <p className='title'>Contract Address: </p>
-          <Input disabled={loading} className='input MT5' placeholder='{ "name": ... }' value={abiJson} onChange={handleChangeAbi} />
+          <Input disabled={loading} className='input MT5' placeholder='0x...' value={contractAddress} onChange={(e) => setContractAddress(e.target.value)} />
         </div>
        <div className='input-wrapper MT10'>
           <p className='title'>Min ABI: </p>
           <Input disabled={loading} className='input MT5' placeholder='{ "name": ... }' value={abiJson} onChange={handleChangeAbi} />
         </div>
-        {loading && <img width={isDarkMode ? 40 : 70} alt='loading' className='MT15 loading' src={isDarkMode ? images.icLoadingDark : images.icLoading} />}
+        {loading && <img width={isDarkMode ? 40 : 70} alt='loading' className='MT15 loading' src={isDarkMode ? icLoadingDark : icLoading} />}
         {
           !loading && abi && <>
             <p className='info MT20'>Function name: {abi?.name}</p>
@@ -149,9 +153,9 @@ const Automatic = () => {
       <>
         <div className='input-wrapper MT15'>
           <div className='title-wrapper'>
-            <p className='title'>Address contract: </p>
+            <p className='title'>User address: </p>
           </div>
-          <Input value={inputs?.addressContract ? inputs.addressContract.value : ''} onChange={(e) => onChangeInputs('addressContract', { value: e.target.value })} className='input MT5'/>
+          <Input value={inputs?.userAddress ? inputs.userAddress.value : ''} onChange={(e) => onChangeInputs('userAddress', { value: e.target.value })} className='input MT5'/>
         </div>
         <div className='input-wrapper MT15'>
           <div className='title-wrapper'>
