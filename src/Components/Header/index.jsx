@@ -1,7 +1,6 @@
 import React from 'react';
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import images from 'src/Configs/images';
 import AppContext from 'src/Context/AppContext';
 import './style.scss'
 import logo from 'src/static/images/2Nlogo.png'
